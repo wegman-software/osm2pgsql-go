@@ -79,7 +79,10 @@ func (e *Encoder) EncodePoint(lon, lat float64) []byte {
 	e.appendFloat64(lon)
 	e.appendFloat64(lat)
 
-	return e.buf
+	// Return a copy to prevent buffer reuse corruption
+	result := make([]byte, len(e.buf))
+	copy(result, e.buf)
+	return result
 }
 
 // EncodeLineString encodes a linestring as EWKB with SRID
@@ -108,7 +111,10 @@ func (e *Encoder) EncodeLineString(coords []float64) []byte {
 		e.appendFloat64(coords[i+1]) // lat
 	}
 
-	return e.buf
+	// Return a copy to prevent buffer reuse corruption
+	result := make([]byte, len(e.buf))
+	copy(result, e.buf)
+	return result
 }
 
 // EncodePolygon encodes a polygon as EWKB with SRID
@@ -141,7 +147,10 @@ func (e *Encoder) EncodePolygon(coords []float64) []byte {
 		e.appendFloat64(coords[i+1]) // lat
 	}
 
-	return e.buf
+	// Return a copy to prevent buffer reuse corruption
+	result := make([]byte, len(e.buf))
+	copy(result, e.buf)
+	return result
 }
 
 // EncodePolygonWithRings encodes a polygon with outer ring and optional inner rings (holes)
@@ -183,7 +192,10 @@ func (e *Encoder) EncodePolygonWithRings(rings [][]float64) []byte {
 		}
 	}
 
-	return e.buf
+	// Return a copy to prevent buffer reuse corruption
+	result := make([]byte, len(e.buf))
+	copy(result, e.buf)
+	return result
 }
 
 // EncodeMultiPolygon encodes multiple polygons as a MultiPolygon EWKB
@@ -238,7 +250,10 @@ func (e *Encoder) EncodeMultiPolygon(polygons [][][]float64) []byte {
 		}
 	}
 
-	return e.buf
+	// Return a copy to prevent buffer reuse corruption
+	result := make([]byte, len(e.buf))
+	copy(result, e.buf)
+	return result
 }
 
 func (e *Encoder) ensureCapacity(n int) {

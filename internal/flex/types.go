@@ -174,6 +174,7 @@ type Row struct {
 	TableName string
 	Values    map[string]interface{}
 	GeomWKB   []byte
+	GeomType  string // Requested geometry type: "point", "linestring", "polygon", "multilinestring", "multipolygon"
 }
 
 // OSMObject represents an OSM object passed to Lua callbacks
