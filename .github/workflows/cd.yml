@@ -56,6 +56,8 @@ jobs:
             wegmansoftware/osm2pgsql-go:${{ needs.version.outputs.semver }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          sbom: true
+          provenance: mode=max
           build-args: |
             BUILD_DATE=${{ github.event.head_commit.timestamp }}
             VCS_REF=${{ github.sha }}
