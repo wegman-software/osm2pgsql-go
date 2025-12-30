@@ -209,7 +209,7 @@ func (pp *ParallelProcessor) workerLoop(ctx context.Context, w *luaWorker) {
 				rows := w.runtime.CollectRows()
 				for i := range rows {
 					if rows[i].GeomWKB == nil {
-						rows[i].GeomWKB = pp.buildGeometry(w, obj)
+						rows[i].GeomWKB = pp.buildGeometry(w, obj, rows[i].GeomType)
 					}
 				}
 				result.rows = rows
@@ -225,9 +225,15 @@ func (pp *ParallelProcessor) workerLoop(ctx context.Context, w *luaWorker) {
 }
 
 // buildGeometry builds WKB geometry from the object using worker's encoder
-func (pp *ParallelProcessor) buildGeometry(w *luaWorker, obj *OSMObject) []byte {
+// geomType specifies the requested geometry type from the Lua script (e.g., "point", "linestring", "polygon")
+// If geomType is empty, the geometry type is inferred from the object type and properties
+func (pp *ParallelProcessor) buildGeometry(w *luaWorker, obj *OSMObject, geomType string) []byte {
 	switch obj.Type {
 	case "node":
+		// Nodes can only be points
+		if geomType != "" && geomType != "point" {
+			return nil // Requested geometry type doesn't match object type
+		}
 		x, y := w.transformer.Transform(obj.Lon, obj.Lat)
 		return w.encoder.EncodePoint(x, y)
 
@@ -239,10 +245,25 @@ func (pp *ParallelProcessor) buildGeometry(w *luaWorker, obj *OSMObject) []byte 
 		copy(coords, obj.Coords)
 		w.transformer.TransformCoords(coords)
 
-		if obj.IsClosed && len(coords) >= 8 {
+		// Use the requested geometry type if specified
+		switch geomType {
+		case "polygon":
+			// Only create polygon if the way is closed and has enough points
+			if !obj.IsClosed || len(coords) < 8 {
+				return nil // Can't create polygon from this way
+			}
 			return w.encoder.EncodePolygon(coords)
+		case "linestring":
+			return w.encoder.EncodeLineString(coords)
+		case "":
+			// No type specified - use legacy behavior (infer from object properties)
+			if obj.IsClosed && len(coords) >= 8 {
+				return w.encoder.EncodePolygon(coords)
+			}
+			return w.encoder.EncodeLineString(coords)
+		default:
+			return nil // Unsupported geometry type for ways
 		}
-		return w.encoder.EncodeLineString(coords)
 
 	case "relation":
 		if len(obj.Coords) < 8 {
@@ -251,7 +272,16 @@ func (pp *ParallelProcessor) buildGeometry(w *luaWorker, obj *OSMObject) []byte 
 		coords := make([]float64, len(obj.Coords))
 		copy(coords, obj.Coords)
 		w.transformer.TransformCoords(coords)
-		return w.encoder.EncodePolygon(coords)
+
+		// Use the requested geometry type if specified
+		switch geomType {
+		case "polygon", "multipolygon", "":
+			return w.encoder.EncodePolygon(coords)
+		case "multilinestring":
+			return w.encoder.EncodeLineString(coords)
+		default:
+			return nil // Unsupported geometry type for relations
+		}
 	}
 
 	return nil

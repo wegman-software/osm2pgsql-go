@@ -264,8 +264,15 @@ func (r *Runtime) tableInsert(table *Table) lua.LGFunction {
 			case lua.LBool:
 				row.Values[keyStr] = bool(v)
 			case *lua.LTable:
-				// Check if it's a geometry userdata
-				if geomData := v.RawGetString("_wkb"); geomData.Type() == lua.LTString {
+				// Check if it's a geometry table (from as_point, as_linestring, as_polygon, etc.)
+				if geomType := v.RawGetString("_type"); geomType.Type() == lua.LTString {
+					row.GeomType = string(geomType.(lua.LString))
+					// If there's already encoded WKB, use it
+					if geomData := v.RawGetString("_wkb"); geomData.Type() == lua.LTString {
+						row.GeomWKB = []byte(string(geomData.(lua.LString)))
+					}
+				} else if geomData := v.RawGetString("_wkb"); geomData.Type() == lua.LTString {
+					// Legacy: just WKB without type
 					row.GeomWKB = []byte(string(geomData.(lua.LString)))
 				} else {
 					// Regular table - convert to JSON-like structure
