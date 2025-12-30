@@ -5,7 +5,6 @@ go 1.24.0
 require (
 	github.com/apache/arrow/go/v14 v14.0.2
 	github.com/jackc/pgx/v5 v5.5.1
-	github.com/marcboeker/go-duckdb v1.5.6
 	github.com/natefinch/lumberjack v2.0.0+incompatible
 	github.com/paulmach/osm v0.8.0
 	github.com/shirou/gopsutil/v4 v4.25.11
@@ -38,7 +37,6 @@ require (
 	github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0 // indirect
 	github.com/minio/asm2plan9s v0.0.0-20200509001527-cdd76441f9d8 // indirect
 	github.com/minio/c2goasm v0.0.0-20190812172519-36a3d3bbc4f3 // indirect
-	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/paulmach/orb v0.11.0 // indirect
 	github.com/paulmach/protoscan v0.2.1 // indirect
 	github.com/pierrec/lz4/v4 v4.1.18 // indirect

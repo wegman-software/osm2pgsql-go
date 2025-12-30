@@ -21,16 +21,14 @@ var (
 var rootCmd = &cobra.Command{
 	Use:   "osm2pgsql-go",
 	Short: "High-performance OSM to PostgreSQL importer",
-	Long: `osm2pgsql-go is a fast, parallel OSM data importer that uses
-columnar processing (Parquet + DuckDB) to achieve significantly faster
-import times compared to traditional row-by-row processing.
+	Long: `osm2pgsql-go is a fast, parallel OSM data importer for PostgreSQL/PostGIS.
 
-The import process has three stages:
-  1. extract  - Parse PBF file and write to Parquet files (parallel)
-  2. transform - Use DuckDB to join nodes with ways and build geometries
-  3. load     - Bulk load geometries into PostgreSQL/PostGIS
-
-You can run all stages with 'import' or run them individually.`,
+Features:
+  - Multi-threaded PBF parsing and geometry building
+  - Memory-mapped node index for O(1) coordinate lookups
+  - Pipelined extraction and loading for reduced import time
+  - Lua Flex support for custom table definitions
+  - Incremental updates with slim mode and OSC change files`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		cfg.Verbose = verbose
 		cfg.LogFile = logFile

@@ -126,7 +126,7 @@ func DefaultConfig() *Config {
 		DBSchema:   "public",
 		Workers:         runtime.NumCPU(),
 		BatchSize:       100000,
-		MemoryMB:        50000, // 50GB default for DuckDB
+		MemoryMB:        50000, // 50GB default memory limit
 		Verbose:         false,
 		LogFile:         "",             // No file logging by default
 		MetricsInterval: 30 * time.Second, // Log system metrics every 30 seconds
