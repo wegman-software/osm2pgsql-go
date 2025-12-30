@@ -9,7 +9,7 @@ jobs:
     name: Determine Version
     runs-on: ubuntu-latest
     outputs:
-      semver: ${{ steps.semver.outputs.version }}
+      semver: ${{ steps.export.outputs.semver }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -17,10 +17,13 @@ jobs:
           fetch-depth: 0
 
       - name: Get semantic version
-        id: semver
         uses: wegman-software/conventional-semver-action@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Export version
+        id: export
+        run: echo "semver=$SEMVER" >> $GITHUB_OUTPUT
 
   docker:
     name: Build and Push Docker Image
