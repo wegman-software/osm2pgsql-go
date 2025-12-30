@@ -343,7 +343,6 @@ osm2pgsql-go/
 │   ├── proj/              # Coordinate projection
 │   ├── replication/       # Replication state management
 │   ├── style/             # Style file parsing
-│   ├── transform/         # Tag transformations
 │   └── wkb/               # WKB geometry encoding
 ├── examples/              # Example Lua styles
 │   ├── simple.lua
