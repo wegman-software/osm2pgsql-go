@@ -4,8 +4,8 @@ import (
 	"encoding/binary"
 	"fmt"
 	"os"
-	"syscall"
-	"unsafe"
+
+	"github.com/edsrzf/mmap-go"
 )
 
 const (
@@ -21,7 +21,7 @@ const (
 // This gives O(1) lookup for any node ID
 type MmapIndex struct {
 	file   *os.File
-	data   []byte
+	data   mmap.MMap
 	size   int64
 	writer bool
 }
@@ -44,7 +44,7 @@ func NewMmapIndex(path string) (*MmapIndex, error) {
 	}
 
 	// Memory map the file
-	data, err := syscall.Mmap(int(f.Fd()), 0, int(size), syscall.PROT_READ|syscall.PROT_WRITE, syscall.MAP_SHARED)
+	data, err := mmap.MapRegion(f, int(size), mmap.RDWR, 0, 0)
 	if err != nil {
 		f.Close()
 		return nil, fmt.Errorf("failed to mmap file: %w", err)
@@ -60,7 +60,7 @@ func NewMmapIndex(path string) (*MmapIndex, error) {
 
 // OpenMmapIndex opens an existing mmap index for reading
 func OpenMmapIndex(path string) (*MmapIndex, error) {
-	f, err := os.Open(path)
+	f, err := os.OpenFile(path, os.O_RDONLY, 0)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open mmap file: %w", err)
 	}
@@ -74,7 +74,7 @@ func OpenMmapIndex(path string) (*MmapIndex, error) {
 	size := info.Size()
 
 	// Memory map the file read-only
-	data, err := syscall.Mmap(int(f.Fd()), 0, int(size), syscall.PROT_READ, syscall.MAP_SHARED)
+	data, err := mmap.MapRegion(f, int(size), mmap.RDONLY, 0, 0)
 	if err != nil {
 		f.Close()
 		return nil, fmt.Errorf("failed to mmap file: %w", err)
@@ -133,21 +133,12 @@ func (m *MmapIndex) Get(nodeID int64) (lat, lon float64, ok bool) {
 
 // Sync flushes changes to disk
 func (m *MmapIndex) Sync() error {
-	// Force msync to ensure data is persisted to disk
-	// This is especially important for large sparse files
-	_, _, errno := syscall.Syscall(syscall.SYS_MSYNC,
-		uintptr(unsafe.Pointer(&m.data[0])),
-		uintptr(len(m.data)),
-		uintptr(syscall.MS_SYNC))
-	if errno != 0 {
-		return errno
-	}
-	return nil
+	return m.data.Flush()
 }
 
 // Close closes the mmap index
 func (m *MmapIndex) Close() error {
-	if err := syscall.Munmap(m.data); err != nil {
+	if err := m.data.Unmap(); err != nil {
 		m.file.Close()
 		return err
 	}

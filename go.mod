@@ -4,6 +4,7 @@ go 1.24.0
 
 require (
 	github.com/apache/arrow/go/v14 v14.0.2
+	github.com/edsrzf/mmap-go v1.2.0
 	github.com/jackc/pgx/v5 v5.5.1
 	github.com/natefinch/lumberjack v2.0.0+incompatible
 	github.com/paulmach/osm v0.8.0
