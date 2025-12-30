@@ -7,7 +7,7 @@ on:
 jobs:
   test:
     name: Test
-    runs-on: home-server-build
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -50,7 +50,7 @@ jobs:
 
   build-docker:
     name: Build Docker Image
-    runs-on: home-server-build
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -69,7 +69,7 @@ jobs:
 
   validate-pr-title:
     name: Validate PR Title
-    runs-on: home-server-build
+    runs-on: ubuntu-latest
     steps:
       - name: Validate conventional commit format
         uses: amannn/action-semantic-pull-request@v5
@@ -95,7 +95,7 @@ jobs:
 
   status:
     name: CI Status
-    runs-on: home-server-build
+    runs-on: ubuntu-latest
     needs: [test, build-docker, validate-pr-title]
     if: always()
     steps:

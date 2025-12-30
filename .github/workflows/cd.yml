@@ -7,7 +7,7 @@ on:
 jobs:
   version:
     name: Determine Version
-    runs-on: home-server-build
+    runs-on: ubuntu-latest
     outputs:
       semver: ${{ steps.semver.outputs.version }}
     steps:
@@ -24,7 +24,7 @@ jobs:
 
   docker:
     name: Build and Push Docker Image
-    runs-on: home-server-build
+    runs-on: ubuntu-latest
     needs: version
     steps:
       - name: Checkout code
@@ -59,7 +59,7 @@ jobs:
 
   release:
     name: Build and Release Go Binaries
-    runs-on: home-server-build
+    runs-on: ubuntu-latest
     needs: version
     permissions:
       contents: write
